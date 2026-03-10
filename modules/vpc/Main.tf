@@ -21,11 +21,6 @@ filter {
     name   = "tag:environment"
     values = [var.current_environment]
   }
-
-filter {
-    name   = "state"
-    values = ["available"]
-  }
 }
 
 # Get Transit Gateway Route Table Details for specific region/environment used by VPCs
@@ -45,11 +40,6 @@ filter {
     name   = "tag:Hosts"
     values = ["VPC"]
   }
-
-filter {
-    name   = "state"
-    values = ["available"]
-  }
 }
 
 # Get Transit Gateway Route Table Details for specific region/environment used by Shared Services (Peering Connections)
@@ -68,11 +58,6 @@ filter {
   filter {
     name   = "tag:Hosts"
     values = ["Shared-Services"]
-  }
-
-filter {
-    name   = "state"
-    values = ["available"]
   }
 }
 
@@ -231,70 +216,6 @@ resource "aws_route_table_association" "public_subnet_association" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_ec2_instance_connect_endpoint" "ec2_connect_endpoint" {
-  subnet_id = values(aws_subnet.private)[0].id
-  security_group_ids = [aws_security_group.ec2_connect_access.id]
-}
-
-resource "aws_security_group" "ec2_connect_access" {
-  name        = "ec2_connect_access.sg"
-  description = "used to by ec2 connect endpoint"
-  vpc_id      = aws_vpc.new_vpc.id
-  tags        = merge(
-    var.security_group_tags,
-    {
-        Access = "ec2_connect_access"
-        Team = var.team_owner
-        environment = var.current_environment
-    }
-  )
-
-  ingress {
-      from_port   = 0
-      to_port     = 0
-      protocol    = -1
-      cidr_blocks = [aws_vpc.new_vpc.cidr_block]
-    }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "base_access" {
-  name        = "remote_access.sg"
-  description = "used to allow only traffic from within the same VPC"
-  vpc_id      = aws_vpc.new_vpc.id
-  tags        = merge(
-    var.security_group_tags,
-    {
-        Access = "Base"
-        Team = var.team_owner
-        environment = var.current_environment
-    }
-  )
-
-  dynamic "ingress" {
-    for_each = var.sg_ports
-    content {
-      from_port   = ingress.value
-      to_port     = ingress.value
-      protocol    = "tcp"
-      cidr_blocks = [aws_vpc.new_vpc.cidr_block]
-    }
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_ec2_transit_gateway_vpc_attachment" "new_vpc_attachment" {
   subnet_ids         = values(aws_subnet.private)[*].id
   transit_gateway_id = data.aws_ec2_transit_gateway.region_tgw.id
@@ -310,5 +231,4 @@ resource "aws_ec2_transit_gateway_route_table_association" "new_vpc_association"
 resource "aws_ec2_transit_gateway_route_table_propagation" "new_vpc_propagation" {
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.new_vpc_attachment.id
   transit_gateway_route_table_id = data.aws_ec2_transit_gateway_route_table.region_tgw_rt_vpc.id
-
 }
