@@ -21,6 +21,11 @@ filter {
     name   = "tag:environment"
     values = [var.current_environment]
   }
+
+filter {
+    name   = "state"
+    values = ["available"]
+  }
 }
 
 # Get Transit Gateway Route Table Details for specific region/environment used by VPCs
@@ -40,6 +45,11 @@ filter {
     name   = "tag:Hosts"
     values = ["VPC"]
   }
+
+filter {
+    name   = "state"
+    values = ["available"]
+  }
 }
 
 # Get Transit Gateway Route Table Details for specific region/environment used by Shared Services (Peering Connections)
@@ -58,6 +68,11 @@ filter {
   filter {
     name   = "tag:Hosts"
     values = ["Shared-Services"]
+  }
+
+filter {
+    name   = "state"
+    values = ["available"]
   }
 }
 
@@ -295,4 +310,5 @@ resource "aws_ec2_transit_gateway_route_table_association" "new_vpc_association"
 resource "aws_ec2_transit_gateway_route_table_propagation" "new_vpc_propagation" {
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.new_vpc_attachment.id
   transit_gateway_route_table_id = data.aws_ec2_transit_gateway_route_table.region_tgw_rt_vpc.id
+
 }
