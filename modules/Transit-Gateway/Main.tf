@@ -9,7 +9,7 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-resource "aws_ec2_transit_gateway" "DEV" {
+resource "aws_ec2_transit_gateway" "NEW" {
   description                     = var.current_environment
   region                          = data.aws_region.current.region
   auto_accept_shared_attachments  = "enable"
@@ -18,27 +18,27 @@ resource "aws_ec2_transit_gateway" "DEV" {
   amazon_side_asn                 = var.BGP_ASN_AVAIL[data.aws_region.current.region]
   tags = merge(
     {
-      Name        = "DEV-VPC-${data.aws_region.current.region}"
+      Name        = "${var.current_environment}-TGW-${data.aws_region.current.region}"
       Region      = data.aws_region.current.region
       environment = var.current_environment
     }
   )
 }
 
-resource "aws_ec2_transit_gateway_route_table" "DEV_VPC" {
-  transit_gateway_id = aws_ec2_transit_gateway.DEV.id
+resource "aws_ec2_transit_gateway_route_table" "NEW_VPC" {
+  transit_gateway_id = aws_ec2_transit_gateway.NEW.id
   tags = {
-    Name        = "DEV-VPC-${data.aws_region.current.region}"
+    Name        = "${var.current_environment}-VPC-${data.aws_region.current.region}"
     Hosts       = "VPC"
     environment = var.current_environment
     Region      = data.aws_region.current.region
   }
 }
 
-resource "aws_ec2_transit_gateway_route_table" "DEV_Transport" {
-  transit_gateway_id = aws_ec2_transit_gateway.DEV.id
+resource "aws_ec2_transit_gateway_route_table" "NEW_Transport" {
+  transit_gateway_id = aws_ec2_transit_gateway.NEW.id
   tags = {
-    Name        = "DEV-Shared-Services-${data.aws_region.current.region}"
+    Name        = "${var.current_environment}-Shared-Services-${data.aws_region.current.region}"
     Hosts       = "Shared-Services"
     environment = var.current_environment
     Region      = data.aws_region.current.region
