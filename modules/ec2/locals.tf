@@ -15,9 +15,9 @@ locals {
 locals {
   instance_type_map = {
     small  = "t3.micro"
-    medium = "t3.micro"
-    large  = "t3.micro"
-    xlarge = "t3.micro"
+    medium = "t3.medium"
+    large  = "t3.large"
+    xlarge = "t3.xlarge"
   }
 }
 
@@ -26,4 +26,5 @@ locals {
         for s in data.aws_subnet.private_subnet_details : s.id
         if s.available_ip_address_count > 5
     ]
+
 }
