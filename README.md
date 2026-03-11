@@ -301,11 +301,12 @@ module "ec2_onboarding" {
 
 - Terraform module design
 - AWS network architecture
-- Transit Gateway deployments
+- Transit Gateway connectivity patterns
 - VPC segmentation and design
 - Infrastructure as Code best practices
-- Multi-team infrastructure ownership
-- Terraform state management
+- Multi-team iplatform architecture
+- Terraform state management strategies
+- Modular infrastructure platform design
 
 ---
 
