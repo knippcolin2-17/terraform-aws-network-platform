@@ -47,8 +47,14 @@ data "aws_subnets" "private" {
   }
 }
 
+data "aws_subnet" "private_subnet_details" {
+  for_each = toset(data.aws_subnets.private.ids)
+  id = each.value
+}
+
 resource "aws_ec2_instance_connect_endpoint" "ec2_connect_endpoint" {
-  subnet_id = values(data.aws_subnets.private)[0].id
+  for_each = local.private_subnets_by_az
+  subnet_id = each.value
   security_group_ids = [aws_security_group.ec2_connect_access.id]
 }
 
@@ -111,3 +117,4 @@ resource "aws_security_group" "base_access" {
   }
 
 }
+
