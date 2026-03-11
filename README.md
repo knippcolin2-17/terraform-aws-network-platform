@@ -1,6 +1,6 @@
 # Terraform AWS Network Platform
 
-This repository demonstrates a **modular Terraform infrastructure design for AWS environments**, following best practices for Infrastructure as Code (IaC).  
+This repository demonstrates an enterprise-style infrastructure platform built with Terraform for deploying modular AWS networking environments. The design models a real-world organizational pattern where a centralized platform/network engineering team manages shared infrastructure while application teams deploy workloads using standardized modules. 
 
 It models a common enterprise deployment pattern where shared network infrastructure is managed by a **network/platform team**, while application teams deploy workloads using standardized modules.
 
