@@ -61,17 +61,28 @@ This modular approach provides:
 
 ## Architecture Overview
 
-The repository is organized into **four main layers**:
+This project demonstrates a modular Terraform-based AWS networking platform designed to separate responsibilities between platform infrastructure and application workloads.
 
-1. **Modules** – Reusable Terraform modules defining AWS components.  
-2. **Network Infrastructure** – Managed by the network/platform team:  
-   - Transit Gateways  
-   - VPC deployments  
-   - Shared networking resources  
-3. **Workloads** – Managed by application teams:  
-   - EC2 instances  
-   - Application workloads  
-4. **Ownership Separation** – Clear boundaries between teams while maintaining consistent deployments.  
+The **Network Team** provisions and manages the shared networking infrastructure using reusable Terraform modules, including the Transit Gateway, VPC, and supporting networking components. 
+
+The **Development Team** consumes the platform by deploying workloads (such as EC2 instances) into the provided networking environment without needing to manage the underlying network infrastructure.
+
+<p align="center">
+  <img src="docs/Terraform-AWS-Network-Platform-Architecture.png" width="900">
+</p>
+
+### Key Components
+
+- **Transit Gateway** – Provides centralized connectivity between VPCs and shared services
+- **VPC** – Serves as the core network boundary for application environments
+- **Public Subnets** – Host infrastructure components that require internet access
+- **Private Subnets** – Isolated environment for application workloads
+- **Internet Gateway** – Enables internet connectivity for public subnet resources
+- **NAT Gateway** – Allows private subnet resources to access the internet securely
+- **Route Tables** – Control network routing between subnets and gateways
+- **VPC Endpoints** – Provide private connectivity to AWS services
+- **Security Groups** – Control inbound and outbound traffic for compute resources
+- **EC2 Instances** – Example workloads deployed by application teams
 
 ---
 
