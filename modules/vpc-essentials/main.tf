@@ -99,7 +99,7 @@ resource "aws_security_group" "base_access" {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = [aws_vpc.new_vpc.cidr_block]
+      cidr_blocks = [data.aws_vpc.new_vpc.cidr_block]
     }
   }
 
@@ -109,4 +109,5 @@ resource "aws_security_group" "base_access" {
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 }
