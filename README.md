@@ -297,6 +297,19 @@ environment = "DEV" #replace with appropriate environment eg. DEV or Prod
 
 ### Example 4: Development Team Deploying EC2
 
+**provider.tf**
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+```
+
 **main.tf**
 
 ```hcl
