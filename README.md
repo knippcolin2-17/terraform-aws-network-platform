@@ -1,5 +1,3 @@
-Edit file 
-
 # Terraform AWS Network Platform
 
 This repository demonstrates a **modular Terraform infrastructure design for AWS environments**, following best practices for Infrastructure as Code (IaC).  
