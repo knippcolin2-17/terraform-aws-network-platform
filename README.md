@@ -79,7 +79,7 @@ The **Development Team** consumes the platform by deploying workloads (such as E
 - **Private Subnets** – Isolated environment for application workloads
 - **Internet Gateway** – Enables internet connectivity for public subnet resources
 - **NAT Gateway** – Allows private subnet resources to access the internet securely
-- **Route Tables** – Control network routing between subnets and gateways
+- **Route Tables (RT)** – Control network routing between subnets and gateways
 - **VPC Endpoints** – Provide private connectivity to AWS services
 - **Security Groups** – Control inbound and outbound traffic for compute resources
 - **EC2 Instances** – Example workloads deployed by application teams
