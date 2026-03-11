@@ -108,23 +108,6 @@ The repository is organized into the following directory layout:
       - locals.tf
       - variables.tf
       - outputs.tf
-
-  - **network/**
-    - **us-east-2/**
-      - **dev/**
-        - main.tf
-        - variables.tf
-        - terraform.tfvars
-        - providers.tf
-
-  - **workloads/**
-    - **us-east-2/**
-      - **dev/**
-        - main.tf
-        - variables.tf
-        - terraform.tfvars
-        - providers.tf
-
   - **README.md**
 
 ## Modules
@@ -264,6 +247,19 @@ cidr_block = {
 
 ### Example 3: Network Team Deploying VPC Essentials
 
+**provider.tf**
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+```
+
 **main.tf**
 
 ```hcl
@@ -273,6 +269,28 @@ module "vpc_essentials" {
   team_owner          = var.team_name
   current_environment = var.environment
 }
+```
+
+**variables.tf**
+
+```hcl
+variable "environment" {
+  type = string
+  description = "Current environment"
+}
+
+variable "team_name" {
+  type = string
+  description = "Name of the team requesting the VPC deployment"
+}
+```
+
+**terraform.tfvars**
+
+```hcl
+team_name = "Team-B" #replace this with appropriate Team name
+
+environment = "DEV" #replace with appropriate environment eg. DEV or Prod
 ```
 
 ---
@@ -293,6 +311,35 @@ module "ec2_onboarding" {
   instance_size    = "small"
   instance_count   = 2
 }
+```
+
+**variables.tf**
+
+```hcl
+variable "team_name" {
+    type = string
+    description = "team deploying the configuration"
+}
+
+variable "environment" {
+  type = string
+  description = "Current environment"
+}
+
+variable "app_name" {
+  type = string
+  description = "Name for the application being hosted on the EC2"
+}
+```
+
+**terraform.tfvars**
+
+```hcl
+team_name = "Team-A" #replace this with appropriate Team name
+
+environment = "DEV" #replace with appropriate environment eg. DEV or Prod
+
+app_name = "Artifactory" #replace with appropriate application name
 ```
 
 ---
