@@ -6,18 +6,18 @@ data "aws_region" "current" {}
 
 # Pull availablity zones marked available for use
 data "aws_availability_zones" "available" {
-    state = "available"
+  state = "available"
 }
 
 # Get Transit Gateway Details for specific region/environment
 data "aws_ec2_transit_gateway" "region_tgw" {
-    
-    filter {
+
+  filter {
     name   = "tag:Region"
     values = [data.aws_region.current.region]
   }
 
-filter {
+  filter {
     name   = "tag:environment"
     values = [var.current_environment]
   }
@@ -25,13 +25,13 @@ filter {
 
 # Get Transit Gateway Route Table Details for specific region/environment used by VPCs
 data "aws_ec2_transit_gateway_route_table" "region_tgw_rt_vpc" {
-    
-    filter {
+
+  filter {
     name   = "tag:Region"
     values = [data.aws_region.current.region]
   }
 
-filter {
+  filter {
     name   = "tag:environment"
     values = [var.current_environment]
   }
@@ -44,13 +44,13 @@ filter {
 
 # Get Transit Gateway Route Table Details for specific region/environment used by Shared Services (Peering Connections)
 data "aws_ec2_transit_gateway_route_table" "region_tgw_rt_shared_service" {
-    
-    filter {
+
+  filter {
     name   = "tag:Region"
     values = [data.aws_region.current.region]
   }
 
-filter {
+  filter {
     name   = "tag:environment"
     values = [var.current_environment]
   }
@@ -61,6 +61,7 @@ filter {
   }
 }
 
+# Creation of new VPC for Application Team use.
 resource "aws_vpc" "new_vpc" {
   cidr_block           = var.new_vpc_cidr_block[data.aws_region.current.region]
   enable_dns_support   = true
@@ -68,47 +69,52 @@ resource "aws_vpc" "new_vpc" {
   tags = merge(
     var.vpc_tags,
     {
-      Region = data.aws_region.current.region
-      Team = var.team_owner
+      Region      = data.aws_region.current.region
+      Team        = var.team_owner
       environment = var.current_environment
-      Name = "${var.team_owner}-${var.current_environment}"
+      Name        = "${var.team_owner}-${var.current_environment}"
     }
   )
 }
 
+# Creation of Internet Gateway. Resource required for public resources to access Internet based applications/resources.
 resource "aws_internet_gateway" "IGW" {
   vpc_id = aws_vpc.new_vpc.id
 
   tags = merge(
     {
-      Region = data.aws_region.current.region
-      Team = var.team_owner
+      Region      = data.aws_region.current.region
+      Team        = var.team_owner
       environment = var.current_environment
-    Name = "${var.team_owner}-${var.current_environment}-IGW"
-  }
+      Name        = "${var.team_owner}-${var.current_environment}-IGW"
+    }
   )
 }
+
+# Creation of Static Public IP dedicated to the NAT GW.
 resource "aws_eip" "nat" {
   domain = "vpc"
 }
 
+# Creation of NAT Gateway. Resource required for private resources to access Internet based applications/resources.
 resource "aws_nat_gateway" "nat_gw" {
   vpc_id            = aws_vpc.new_vpc.id
-  allocation_id = aws_eip.nat.id
+  allocation_id     = aws_eip.nat.id
   connectivity_type = "public"
   availability_mode = "regional"
-  depends_on = [aws_internet_gateway.IGW]
+  depends_on        = [aws_internet_gateway.IGW]
 
   tags = merge(
     {
-      Region = data.aws_region.current.region
-      Team = var.team_owner
+      Region      = data.aws_region.current.region
+      Team        = var.team_owner
       environment = var.current_environment
-    Name = "${var.team_owner}-${var.current_environment}-nat-gw"
-  }
+      Name        = "${var.team_owner}-${var.current_environment}-nat-gw"
+    }
   )
 }
 
+# Creation of Public Subnet. Dedicated to deploying resources for accesing from external network.
 resource "aws_subnet" "public" {
 
   for_each = toset(var.public_subnet_cidr_range)
@@ -125,15 +131,16 @@ resource "aws_subnet" "public" {
   tags = merge(
     var.subnet_tags,
     {
-      Region  = data.aws_region.current.region
-      Team = var.team_owner
+      Region      = data.aws_region.current.region
+      Team        = var.team_owner
       environment = var.current_environment
-      Private = "False"
-      Name    = "Public-${each.value + 1}"
+      Private     = "False"
+      Name        = "Public-${each.value + 1}"
     }
   )
 }
 
+# Creation of Private Subnet. Dedicated to deploying resources for accesing from internal network.
 resource "aws_subnet" "private" {
 
   for_each = toset(var.private_subnet_cidr_range)
@@ -150,15 +157,16 @@ resource "aws_subnet" "private" {
   tags = merge(
     var.subnet_tags,
     {
-      Region  = data.aws_region.current.region
-      Team = var.team_owner
-      Private = "True"
+      Region      = data.aws_region.current.region
+      Team        = var.team_owner
+      Private     = "True"
       environment = var.current_environment
-      Name    = "Private-${each.value + 1}"
+      Name        = "Private-${each.value + 1}"
     }
   )
 }
 
+# Creation of Private Route Table to be used by private facing resources hosted in the newly created VPC.
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.new_vpc.id
 
@@ -167,19 +175,20 @@ resource "aws_route_table" "private_rt" {
     gateway_id = data.aws_ec2_transit_gateway.region_tgw.id
   }
 
-route {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.nat_gw.id
   }
-tags = merge(
-   {
-    environment = var.current_environment
-    Region  = data.aws_region.current.region
-    Name = "Private-RT"
-  }
+  tags = merge(
+    {
+      environment = var.current_environment
+      Region      = data.aws_region.current.region
+      Name        = "Private-RT"
+    }
   )
 }
 
+# Associating default Private Route Table to the appropriate subnets.
 resource "aws_route_table_association" "private_subnet_association" {
   for_each = aws_subnet.private
 
@@ -187,7 +196,8 @@ resource "aws_route_table_association" "private_subnet_association" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-  resource "aws_route_table" "public_rt" {
+# Creation of Public Route Table to be used by public facing resources hosted in the newly created VPC.
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.new_vpc.id
 
   route {
@@ -195,20 +205,21 @@ resource "aws_route_table_association" "private_subnet_association" {
     gateway_id = data.aws_ec2_transit_gateway.region_tgw.id
   }
 
-route {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.IGW.id
   }
 
   tags = merge(
-   {
-    environment = var.current_environment
-    Region  = data.aws_region.current.region
-    Name = "Public-RT"
-  }
+    {
+      environment = var.current_environment
+      Region      = data.aws_region.current.region
+      Name        = "Public-RT"
+    }
   )
 }
 
+# Associating default Public Route Table to the appropriate subnets.
 resource "aws_route_table_association" "public_subnet_association" {
   for_each = aws_subnet.public
 
@@ -216,18 +227,21 @@ resource "aws_route_table_association" "public_subnet_association" {
   route_table_id = aws_route_table.public_rt.id
 }
 
+# Creates a VPC attachment for the newly created VPC to the appropriate TGW based off of (ENV/Region).
 resource "aws_ec2_transit_gateway_vpc_attachment" "new_vpc_attachment" {
   subnet_ids         = values(aws_subnet.private)[*].id
   transit_gateway_id = data.aws_ec2_transit_gateway.region_tgw.id
 
-  vpc_id             = aws_vpc.new_vpc.id
+  vpc_id = aws_vpc.new_vpc.id
 }
 
+# Associates the new VPC to the appropriate Transit Gateway Route Table. Used for accessing resources hosted outside of its own VPC.
 resource "aws_ec2_transit_gateway_route_table_association" "new_vpc_association" {
-  transit_gateway_attachment_id = aws_ec2_transit_gateway_vpc_attachment.new_vpc_attachment.id
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.new_vpc_attachment.id
   transit_gateway_route_table_id = data.aws_ec2_transit_gateway_route_table.region_tgw_rt_vpc.id
 }
 
+# Propogates VPC CIDR for newly created VPC to the appropriate TGW Route Table for other resources outside of the its VPC to it.
 resource "aws_ec2_transit_gateway_route_table_propagation" "new_vpc_propagation" {
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.new_vpc_attachment.id
   transit_gateway_route_table_id = data.aws_ec2_transit_gateway_route_table.region_tgw_rt_vpc.id
