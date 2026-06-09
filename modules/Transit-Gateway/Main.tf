@@ -1,14 +1,18 @@
-#Pull user details
+#Used to pull user details.
 data "aws_caller_identity" "current" {}
 
-# Pull set region from AWS Configure
+# Used to pull set region from AWS Configure.
 data "aws_region" "current" {}
 
-# Pull availablity zones marked available for use
+# Used to pull availablity zones marked available for use.
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
+# Transit Gateway — regional hub for all VPC attachments
+# auto_accept_shared_attachments disabled intentionally — require explicit acceptance
+# for cross-account attachments to enforce security review process
+# dns_support enabled to allow DNS resolution across VPC boundaries
 resource "aws_ec2_transit_gateway" "NEW" {
   description                     = var.current_environment
   region                          = data.aws_region.current.region
@@ -25,6 +29,7 @@ resource "aws_ec2_transit_gateway" "NEW" {
   )
 }
 
+# Transit Gateway Route used for dedicated Application Teams forward/reverse route.
 resource "aws_ec2_transit_gateway_route_table" "NEW_VPC" {
   transit_gateway_id = aws_ec2_transit_gateway.NEW.id
   tags = {
@@ -35,6 +40,7 @@ resource "aws_ec2_transit_gateway_route_table" "NEW_VPC" {
   }
 }
 
+# Transit Gateway Route Table used for Central Network Resources (VPNs/DX/Inspection VPC)
 resource "aws_ec2_transit_gateway_route_table" "NEW_Transport" {
   transit_gateway_id = aws_ec2_transit_gateway.NEW.id
   tags = {

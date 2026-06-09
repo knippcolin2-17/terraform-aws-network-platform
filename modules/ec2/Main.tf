@@ -1,15 +1,15 @@
-#Pull user details
+# Used to pull user details.
 data "aws_caller_identity" "current" {}
 
-# Pull set region from AWS Configure
+# Used to pull set region from AWS Configure.
 data "aws_region" "current" {}
 
-# Pull availablity zones marked available for use
+# Used to pull availablity zones marked available for use.
 data "aws_availability_zones" "available" {
-    state = "available"
+  state = "available"
 }
 
-# Get the Team VPC
+# Used to get the VPC details corresponding to the provided Team variable.
 data "aws_vpc" "team" {
 
   filter {
@@ -18,12 +18,12 @@ data "aws_vpc" "team" {
   }
 
   filter {
-      name   = "tag:environment"
+    name   = "tag:environment"
     values = [var.current_environment]
   }
 }
 
-# Get all the Team private subnets for the Team VPC
+# Used to get all the Team private subnets for the applicable Teams VPC.
 data "aws_subnets" "private" {
 
   filter {
@@ -31,8 +31,8 @@ data "aws_subnets" "private" {
     values = [data.aws_vpc.team.id]
   }
 
-    filter {
-      name   = "tag:environment"
+  filter {
+    name   = "tag:environment"
     values = [var.current_environment]
   }
 
@@ -47,22 +47,22 @@ data "aws_subnets" "private" {
   }
 }
 
-# Get details for each individual Private Subnet (Required: to Check available IPs per subnet)
+# Used to get the details for each individual Private Subnet (Required: to Check available IPs per subnet).
 data "aws_subnet" "private_subnet_details" {
   for_each = toset(data.aws_subnets.private.ids)
-  id = each.value
+  id       = each.value
 }
 
-# Get the Base Security Group for Team VPC
+# Used to get the Base Security Group for the applicable Teams VPC.
 data "aws_security_group" "base" {
 
   filter {
     name   = "tag:Team"
     values = [var.team_owner]
   }
-  
-filter {
-      name   = "tag:environment"
+
+  filter {
+    name   = "tag:environment"
     values = [var.current_environment]
   }
 
@@ -71,7 +71,7 @@ filter {
     values = [data.aws_vpc.team.id]
   }
 
-   filter {
+  filter {
     name   = "tag:Team"
     values = [var.team_owner]
   }
@@ -82,7 +82,7 @@ filter {
   }
 }
 
-# Get latest AMI for Amazon Linux
+# Used to get the latest AMI for Amazon Linux.
 data "aws_ami" "amazon_linux" {
   most_recent = true
 
@@ -104,7 +104,7 @@ data "aws_ami" "amazon_linux" {
   owners = ["amazon"]
 }
 
-# Get latest AMI for Ubuntu
+# Used to get the latest AMI for Ubuntu.
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -118,10 +118,10 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"]  # Canonical
+  owners = ["099720109477"]
 }
 
-# Get latest AMI for Windows
+# Used to get the latest AMI for Windows.
 data "aws_ami" "windows" {
   most_recent = true
 
@@ -135,34 +135,35 @@ data "aws_ami" "windows" {
     values = ["hvm"]
   }
 
-  owners = ["801119661308"]  # AWS official Windows AMIs
+  owners = ["801119661308"]
 }
 
+# EC2 Creation - Resource hosted and managed by the applciable Team.
 resource "aws_instance" "EC2_Creation" {
-count = var.instance_count
-subnet_id = local.eligble_subnets[count.index % length(local.eligble_subnets)]
+  count                       = var.instance_count
+  subnet_id                   = local.eligble_subnets[count.index % length(local.eligble_subnets)]
   ami                         = local.ami_map[var.operating_system]
   associate_public_ip_address = "false"
-  instance_type = local.instance_type_map[var.instance_size]
-  security_groups = [data.aws_security_group.base.id]
+  instance_type               = local.instance_type_map[var.instance_size]
+  security_groups             = [data.aws_security_group.base.id]
 
   lifecycle {
     ignore_changes = [
       ami,
-    user_data
+      user_data
     ]
   }
-
+# Standardization of Tags for Security Requirements.
   tags = merge(
     var.ec2_tags,
     local.time_stamp_tags,
     {
-      Name   = "ec2-${var.application_name}-${count.index + 1}"
-      Team = var.team_owner
+      Name        = "ec2-${var.application_name}-${count.index + 1}"
+      Team        = var.team_owner
       environment = var.current_environment
-      OS     = var.operating_system
-      Region = data.aws_region.current.region
-      app = var.application_name
+      OS          = var.operating_system
+      Region      = data.aws_region.current.region
+      app         = var.application_name
     }
   )
 }
