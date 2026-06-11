@@ -123,7 +123,11 @@ The repository is organized into the following directory layout:
       - locals.tf
       - variables.tf
   - **scripts/**
-      - resource_status_check.py
+      - check_all.py
+      - check_ec2.py
+      - check_tgw.py
+      - check_vpc.py
+      - README.md
   - **README.md**
 
 ## Modules
