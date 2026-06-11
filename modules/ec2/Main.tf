@@ -153,7 +153,7 @@ resource "aws_instance" "EC2_Creation" {
       user_data
     ]
   }
-# Standardization of Tags for Security Requirements.
+  # Standardization of Tags for Security Requirements.
   tags = merge(
     var.ec2_tags,
     local.time_stamp_tags,
