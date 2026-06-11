@@ -7,20 +7,30 @@ It models a common enterprise deployment pattern where shared network infrastruc
 ---
 
 ## Table of Contents
-1. [Project Goals](#project-goals)
-2. [Enterprise Deployment Scenario](#enterprise-deployment-scenario)
-3. [Benefits](#benefits)
-4. [Architecture Overview](#architecture-overview)
-5. [Repository Structure](#repository-structure)
-6. [Modules](#modules)
-7. [Terraform State Management](#terraform-state-management)
-8. [Usage Examples](#usage-examples)
+1. [Prerequisites](#prerequisites)
+2. [Project Goals](#project-goals)
+3. [Enterprise Deployment Scenario](#enterprise-deployment-scenario)
+4. [Benefits](#benefits)
+5. [Architecture Overview](#architecture-overview)
+6. [Repository Structure](#repository-structure)
+7. [Modules](#modules)
+8. [Terraform State Management](#terraform-state-management)
+9. [Usage Examples](#usage-examples)
     - [Example 1: Network Team Deploying Transit Gateway](#example-1-network-team-deploying-transit-gateway)
     - [Example 2: Network Team Deploying VPC](#example-2-network-team-deploying-vpc)
     - [Example 3: Network Team Deploying VPC Essentials](#example-3-network-team-deploying-vpc-essentials)
     - [Example 4: Development Team Deploying EC2](#example-4-development-team-deploying-ec2)
-9. [Skills Demonstrated](#skills-demonstrated)
-10. [Future Enhancements](#future-enhancements)
+10. [Skills Demonstrated](#skills-demonstrated)
+11. [Future Enhancements](#future-enhancements)
+
+---
+
+## Prerequisites
+
+- Terraform
+- AWS CLI
+- Python 3.x
+- boto3
 
 ---
 
