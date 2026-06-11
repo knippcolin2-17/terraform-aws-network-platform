@@ -215,6 +215,19 @@ BGP_ASN_AVAIL = {
 
 ### Example 2: Network Team Deploying VPC
 
+**provider.tf**
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+```
+
 **main.tf**
 
 ```hcl
