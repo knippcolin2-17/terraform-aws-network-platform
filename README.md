@@ -108,6 +108,12 @@ The repository is organized into the following directory layout:
       - locals.tf
       - variables.tf
       - outputs.tf
+    - **vpc-essentials/**
+      - main.tf
+      - locals.tf
+      - variables.tf
+  - **scripts/**
+      - resource_status_check.py
   - **README.md**
 
 ## Modules
