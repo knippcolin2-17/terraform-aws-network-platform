@@ -402,6 +402,5 @@ app_name = "Artifactory" #replace with appropriate application name
 ## Future Enhancements
 
 - CI/CD pipelines for Terraform
-- Centralized logging
 - Security monitoring
 - Multi-account AWS organization deployments
